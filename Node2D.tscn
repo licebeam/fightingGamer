@@ -6,7 +6,7 @@
 [ext_resource path="res://scripts/inputLabel.gd" type="Script" id=4]
 [ext_resource path="res://sprites/fixedBG.png" type="Texture" id=5]
 [ext_resource path="res://Pixolletta8px.ttf" type="DynamicFontData" id=6]
-[ext_resource path="res://sprites/MOCKUP1.png" type="Texture" id=7]
+[ext_resource path="res://MOCKUP1.png" type="Texture" id=7]
 [ext_resource path="res://sprites/Timer.png" type="Texture" id=8]
 [ext_resource path="res://scripts/TimerObject.gd" type="Script" id=9]
 [ext_resource path="res://scripts/TimerSprite.gd" type="Script" id=10]
@@ -234,24 +234,6 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="UI Specific" type="Node2D" parent="TheGame"]
-position = Vector2( 242, 237 )
-script = ExtResource( 9 )
-
-[node name="TimerSprite" type="Sprite" parent="TheGame/UI Specific"]
-position = Vector2( 143, 76 )
-texture = ExtResource( 8 )
-offset = Vector2( 3, 0 )
-hframes = 11
-script = ExtResource( 10 )
-
-[node name="TimerSprite2" type="Sprite" parent="TheGame/UI Specific"]
-position = Vector2( 177, 76 )
-texture = ExtResource( 8 )
-offset = Vector2( 3, 0 )
-hframes = 11
-script = ExtResource( 10 )
-
 [node name="CameraController" type="KinematicBody2D" parent="TheGame"]
 position = Vector2( 404, 261 )
 script = ExtResource( 11 )
@@ -348,17 +330,45 @@ margin_right = 257.0
 margin_bottom = 79.0
 text = "qweqweqweqweqew"
 
-[node name="Sprite" type="Sprite" parent="CanvasLayer"]
+[node name="UIMOCK" type="Sprite" parent="CanvasLayer"]
 position = Vector2( 128, 72 )
 texture = ExtResource( 7 )
+hframes = 2
+frame = 1
 
 [node name="ColorRect" type="ColorRect" parent="CanvasLayer"]
+visible = false
 material = SubResource( 24 )
 margin_right = 256.0
 margin_bottom = 144.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="UI Specific" type="Node2D" parent="CanvasLayer"]
+position = Vector2( -33, -66 )
+script = ExtResource( 9 )
+
+[node name="timerBG" type="Sprite" parent="CanvasLayer/UI Specific"]
+position = Vector2( 162, 85 )
+texture = ExtResource( 8 )
+hframes = 11
+
+[node name="TimerSprite" type="Sprite" parent="CanvasLayer/UI Specific"]
+position = Vector2( 150, 80 )
+texture = ExtResource( 8 )
+offset = Vector2( 3, 0 )
+hframes = 11
+frame = 1
+script = ExtResource( 10 )
+
+[node name="TimerSprite2" type="Sprite" parent="CanvasLayer/UI Specific"]
+position = Vector2( 166, 80 )
+texture = ExtResource( 8 )
+offset = Vector2( 3, 0 )
+hframes = 11
+frame = 1
+script = ExtResource( 10 )
 
 [node name="BACKGROUND" type="Node2D" parent="."]
 
