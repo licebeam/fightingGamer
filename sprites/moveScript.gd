@@ -11,7 +11,6 @@ var bufferTime = MAXBUFFER;
 var MAXKARA = 20 # the amount of kara frames needs to be adjusted
 var karaTimer = MAXKARA;
 var canKara = false;
-
 var inputSequence = [];
 var commands = {
 	'dash': ['right', 'right'],
@@ -33,22 +32,18 @@ var isChargedDown= false;
 const DASHFORWARD = 800;
 const DASHBACK = 500;
 const FALLSPEED = 500;
-
 var jumpHeight = 0;
 var jumpSpeed = 2; #2px per frame
 var fallSpeed = 4; #4px per frame
 const MAXAIRACCEL = 4;
 var airAccel = 0;
-
 var isCrouching = false;
-
 var moveRight = Vector2(200, 0)
 var moveLeft = Vector2(-180, 0)
 
 #state machine
 enum STATES {IDLE, JAB, STRONG, FIERCE, HADOU, JUMPING, FALLING}
 var currentState = STATES.IDLE;
-
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -96,21 +91,20 @@ func checkCommand():
 			bufferTime = MAXBUFFER;
 	yield(get_tree(), "idle_frame")
 	
-func checkAndClearKara():
+func checkAndClearKara(): #this needs to be changed via animation eventually.
 	karaTimer -= 1;
 	if karaTimer <= 0:
 		canKara = false;
 		karaTimer = MAXKARA
 		print('kara stop')
 	
-func checkAndClearBuffer():
+func checkAndClearBuffer(): #this needs to change to pop from the back of the array eventually.
 	bufferTime -= 1;
 	if bufferTime <= 0:
 		inputSequence = []; # can set this to empty to clear the display of inputs;
 
 	 
 func getInput():
-	# test
 	if Input.is_action_pressed('up') && currentState == STATES.IDLE:
 		currentState = STATES.JUMPING;
 		
@@ -197,8 +191,8 @@ func _process(delta):
 		
 	changeState();
 	handleJumpState();
-				
 #-------------------------------------------
+
 func handleJumpState():
 		#handle jump state 
 	if(jumpHeight >= 8) && currentState == STATES.JUMPING: 
@@ -211,7 +205,6 @@ func handleJumpState():
 	if(jumpHeight >= 0 && jumpHeight <= 7): #hang time
 		jumpHeight -= 1
 		airAccel = 0;
-		#maintain height
 		
 	if jumpHeight <= 0 && currentState == STATES.FALLING:
 		if(airAccel < MAXAIRACCEL):
@@ -225,7 +218,7 @@ func handleJumpState():
 
 func animFinished(name):
 	print('animation end', name)
-	if(name == 'jumpUp' || name == 'falling'):
+	if(name == 'jumpUp' || name == 'falling'): # whatever animation that ends where we don't IDLE
 		currentState = STATES.FALLING
 		return;
 	else: 
@@ -257,13 +250,11 @@ func changeState(defactoState = false):
 			anim.play('falling');
 	
 func moveSetExecute(command): 
-	#check for Kara
-		
 	if(command == 'dash') && currentState == STATES.IDLE:
-		print('did a dash');
-		dash('none')
+		print('dash');
+		move_and_slide(Vector2(DASHFORWARD, 0))
 	if(command == 'dashBack'  && currentState == STATES.IDLE):
-		print('did a dash left');
+		print('dash');
 		move_and_slide(Vector2(-DASHBACK, 0))
 	if(command == 'hcb'):
 		print('did half circle back');
@@ -282,8 +273,4 @@ func moveSetExecute(command):
 func switchSides():
 	print('switching')
 		
-
 ## functions related to actual actions
-func dash(dir): 
-	print('did a dash')
-	move_and_slide(Vector2(DASHFORWARD, 0))
