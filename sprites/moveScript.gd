@@ -12,11 +12,11 @@ var MAXKARA = 20 # the amount of kara frames needs to be adjusted
 var karaTimer = MAXKARA;
 var canKara = false;
 var inputSequence = [];
+var isForward = false;
+var isBackward = false;
 var commands = {
 	'dash': ['right', 'right'],
 	'dashBack': ['left', 'left'],
-	#'hcb': ['left', 'down', 'right'],
-	#'hcf': ['right', 'down', 'left'],
 	'hadouL': ['down', 'right', 'lp'],
 	'lpBoom': ['lp', 'right', 'left'],
 };
@@ -118,6 +118,8 @@ func getInput():
 		if !isCrouching: 
 			move_and_slide(moveRight)
 		bufferTime = MAXBUFFER;
+		isBackward = false;
+		isForward = true;
 		
 	if Input.is_action_just_pressed('left'):
 		inputSequence.push_back('left');
@@ -129,6 +131,8 @@ func getInput():
 		if !isCrouching && currentState == STATES.IDLE: 
 			move_and_slide(moveLeft)
 		bufferTime = MAXBUFFER;
+		isForward = false;
+		isBackward = true;
 		chargeBack()
 			
 	if Input.is_action_pressed('left') == false && chargeBackTimer <= MAXCHARGETIME: 
@@ -166,6 +170,12 @@ func getInput():
 		if currentState == STATES.IDLE: #this checks to make sure we are not already doing some command.
 			currentState = STATES.STRONG;
 			canKara = true;
+			
+	if(currentState != STATES.JUMPING && currentState != STATES.FALLING):
+		if(!Input.is_action_pressed("right")):
+			isForward = false;
+		if(!Input.is_action_pressed("left")):
+			isBackward = false;
 		
 func chargeBack():
 	if chargeBackTimer >= 1:
@@ -199,17 +209,31 @@ func handleJumpState():
 		jumpHeight -= 1;
 		if(airAccel < MAXAIRACCEL):
 			airAccel += 0.15;
-		move_and_slide(Vector2(0, (-60 * jumpSpeed) / airAccel))
-		#self.position.y -= (1 * jumpSpeed) / airAccel;
+		if(isForward):
+			move_and_slide(Vector2(60, (-60 * jumpSpeed) / airAccel))
+		elif(isBackward):
+			move_and_slide(Vector2(-60, (-60 * jumpSpeed) / airAccel))
+		else: 
+			move_and_slide(Vector2(0, (-60 * jumpSpeed) / airAccel))
+		#self.position.y -= (1 * jumpSpeed) / airAccel; original jump code, move_and_slide uses delta
 		
-	if(jumpHeight >= 0 && jumpHeight <= 7): #hang time
+	if(jumpHeight >= 0 && jumpHeight <= 7): #hang time + move left and right on jump
 		jumpHeight -= 1
 		airAccel = 0;
+		if(isForward):
+			move_and_slide(Vector2(60, 0))
+		elif(isBackward):
+			move_and_slide(Vector2(-60, 0))
 		
 	if jumpHeight <= 0 && currentState == STATES.FALLING:
 		if(airAccel < MAXAIRACCEL):
 			airAccel += 0.2;
-		move_and_slide(Vector2(0, (60 * fallSpeed) * airAccel)) #the amount of acceleration needs to be adjusted.
+		if(isForward):
+			move_and_slide(Vector2(60, (60 * fallSpeed) * airAccel)) #the amount of acceleration needs to be adjusted.
+		elif(isBackward):
+			move_and_slide(Vector2(-60, (60 * fallSpeed) * airAccel)) #the amount of acceleration needs to be adjusted.
+		else:
+			move_and_slide(Vector2(0, (60 * fallSpeed) * airAccel)) #the amount of acceleration needs to be adjusted.
 		for i in get_slide_count():
 			var collision = get_slide_collision(i)
 			if collision.collider.name == 'ground': 

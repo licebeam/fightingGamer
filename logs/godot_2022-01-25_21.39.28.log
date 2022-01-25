@@ -2,72 +2,10 @@ Godot Engine v3.4.1.stable.official.aa1b95889 - https://godotengine.org
 OpenGL ES 3.0 Renderer: NVIDIA GeForce GTX 1650 with Max-Q Design/PCIe/SSE2
 OpenGL ES Batching: ON
  
-animation endjumpUp
+[left]
 [right]
 animation endjumpUp
 [left]
-animation endjumpUp
-animation endjumpUp
-[left]
-animation endjumpUp
-[right]
-animation endjumpUp
-[left]
-animation endjumpUp
-animation endjumpUp
-[left]
-animation endjumpUp
-[right]
-animation endjumpUp
-animation endjumpUp
-[right]
-animation endjumpUp
-[left]
-animation endjumpUp
-[left]
-[right]
-[right]
-animation endjumpUp
-[down]
-[down, right]
-[down, right, lp]
-did a hadouken with lP
-[right]
-animation endhadouken
-[right]
-animation endjumpUp
-[left]
-[left, right]
-[left, right, left]
-dash
-[left]
-[down]
-[down, right]
-[down, right, lp]
-did a hadouken with lP
-animation endhadouken
-[right]
-animation endjumpUp
-[right]
-animation endjumpUp
-[left]
-animation endjumpUp
-[left]
-animation endjumpUp
-[right]
-[left]
-[left, right]
-[left, right, left]
-dash
-[right]
-[right, left]
-[right, left, right]
-dash
-[left]
-[right]
-[right, right]
-dash
-[right]
 animation endjumpUp
 [left]
 [left, left]
@@ -77,8 +15,84 @@ animation endjumpUp
 [right, right]
 dash
 animation endjumpUp
+[right]
+animation endjumpUp
+[right]
+[right]
+animation endjumpUp
+[left]
+animation endjumpUp
+[left]
+animation endjumpUp
+[left]
+animation endjumpUp
+[left]
+animation endjumpUp
+[left]
+animation endjumpUp
+[left]
+animation endjumpUp
+[right]
+animation endjumpUp
+[right]
+animation endjumpUp
+[right]
+animation endjumpUp
+[right]
+animation endjumpUp
+[right]
+animation endjumpUp
+[left]
+[left]
+animation endjumpUp
+[left]
+animation endjumpUp
+[left]
+animation endjumpUp
+[right]
+animation endjumpUp
+[right]
+animation endjumpUp
+[left]
+[left, left]
+dash
+[right]
+[right, right]
+dash
+animation endjumpUp
+[left]
+[left]
+animation endjumpUp
+[right]
+[right]
+[right, right]
+dash
+[left]
+[left, left]
+dash
+[right]
+[right, right]
+dash
+[left]
+animation endjumpUp
+[right]
+animation endjumpUp
+[lp]
+animation endjumpUp
+[left]
+[left]
+[lp]
+animation endjumpUp
+[right]
+[down]
 [down]
 [down, right]
+[down, right, lp]
+did a hadouken with lP
+[down]
+[right]
+[lp]
+animation endhadouken
 [down]
 [down, right]
 [down, right, lp]
