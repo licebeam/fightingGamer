@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/FH000010.JPG-063cfe41f27eaf3990d1897aabd26d40.stex"
+path="res://.import/ryuCut.png-46fe4543c063b5ae6a2616d58d67f56a.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://FH000010.JPG"
-dest_files=[ "res://.import/FH000010.JPG-063cfe41f27eaf3990d1897aabd26d40.stex" ]
+source_file="res://sprites/ryuCut.png"
+dest_files=[ "res://.import/ryuCut.png-46fe4543c063b5ae6a2616d58d67f56a.stex" ]
 
 [params]
 

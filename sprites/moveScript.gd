@@ -3,9 +3,10 @@ extends KinematicBody2D
 # externals
 var inputLable;
 var anim;
+var debugLable;
 
 # command related
-const MAXBUFFER = 16; # frames of total input storage before we delete everything.
+const MAXBUFFER = 8; # frames of total input storage before we delete everything.
 var bufferTime = MAXBUFFER;
 var MAXKARA = 20 # the amount of kara frames needs to be adjusted
 var karaTimer = MAXKARA;
@@ -31,13 +32,21 @@ var isChargedDown= false;
 #character specific 
 const DASHFORWARD = 800;
 const DASHBACK = 500;
+const FALLSPEED = 500;
+
+var jumpHeight = 0;
+var jumpSpeed = 2; #2px per frame
+var fallSpeed = 4; #4px per frame
+const MAXAIRACCEL = 4;
+var airAccel = 0;
+
 var isCrouching = false;
 
 var moveRight = Vector2(200, 0)
 var moveLeft = Vector2(-180, 0)
 
 #state machine
-enum STATES {IDLE, JAB, STRONG, FIERCE, HADOU}
+enum STATES {IDLE, JAB, STRONG, FIERCE, HADOU, JUMPING, FALLING}
 var currentState = STATES.IDLE;
 
 
@@ -47,49 +56,44 @@ func _ready():
 	anim = get_node("AnimationPlayer");
 	inputLable = get_node("../../CanvasLayer/inputLabel")
 	anim.connect("animation_finished", self, "animFinished");
+	debugLable = get_node("DebugLabel");
 
 #function specifically for moving during an animation frame. used by the animation player
-func moveViaAnimation(amount): 
+func moveViaAnimation(amount): #change to pixels eventually
 	move_and_slide(Vector2(amount, 0))
 
-func arrayBuffCheck(seq, com, n):
+func arrayBuffCheck(seq, com, n, f): # should refactor this check
 	if !range(seq.size()).has(n): 
 		return false
-	if !range(com.size()).has(n): 
+	if !range(com.size()).has(f): 
 		return false
 	return true
 		
 func checkCommand(): 
-	# print(inputSequence);
+	print(inputSequence);
 	for command in commands: 
 		var actualCombo = 0;
 		var n = 0;
-		#var badCommands = 0;
-		
-		while n <= inputSequence.size(): #needs to be a o(log2) func, n +=1 doesnt work thats why.....
-			
-			#if  arrayBuffCheck(inputSequence, commands[command], n) && inputSequence[n] != commands[command][n]:
-				# badCommands += 1
-				#print('skip n ', n)
-				#n += 1
-			
-			
-			if  arrayBuffCheck(inputSequence, commands[command], n) && inputSequence[n] == commands[command][n]:
-				print(n, ' weird n')	
+		var foundInput = 0;
+		var fudgedInputs = 0;
+		while n <= inputSequence.size():
+			var shouldSkip = false;
+			if fudgedInputs >= 3: 
+				break
+			if  arrayBuffCheck(inputSequence, commands[command], n, foundInput) && inputSequence[n] != commands[command][foundInput]:
+				shouldSkip = true;
+				fudgedInputs +=1;
+				
+			if  !shouldSkip && arrayBuffCheck(inputSequence, commands[command], n, foundInput) && inputSequence[n] == commands[command][foundInput]:
 				actualCombo += 1;
-				# lastKnown = n;
-					
+				foundInput += 1;	
 			n += 1;
 
-	
-			
 		if actualCombo >= commands[command].size():
 			if(canKara or currentState == STATES.IDLE):
 				inputSequence = [];
 				moveSetExecute(command)
 			bufferTime = MAXBUFFER;
-
-
 	yield(get_tree(), "idle_frame")
 	
 func checkAndClearKara():
@@ -106,6 +110,10 @@ func checkAndClearBuffer():
 
 	 
 func getInput():
+	# test
+	if Input.is_action_pressed('up') && currentState == STATES.IDLE:
+		currentState = STATES.JUMPING;
+		
 	if Input.is_action_just_pressed('right'):
 		inputSequence.push_back('right');
 		inputLable.text += 'right '
@@ -175,6 +183,7 @@ func chargeBack():
 		
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
+	debugLable.text = str(currentState)
 	getInput()
 	checkAndClearBuffer()
 		
@@ -185,13 +194,46 @@ func _process(delta):
 	
 	if canKara: 
 		checkAndClearKara();
+		
 	changeState();
-#	pass
+	handleJumpState();
+				
+#-------------------------------------------
+func handleJumpState():
+		#handle jump state 
+	if(jumpHeight >= 8) && currentState == STATES.JUMPING: 
+		jumpHeight -= 1;
+		if(airAccel < MAXAIRACCEL):
+			airAccel += 0.15;
+		move_and_slide(Vector2(0, (-60 * jumpSpeed) / airAccel))
+		#self.position.y -= (1 * jumpSpeed) / airAccel;
+		
+	if(jumpHeight >= 0 && jumpHeight <= 7): #hang time
+		jumpHeight -= 1
+		airAccel = 0;
+		#maintain height
+		
+	if jumpHeight <= 0 && currentState == STATES.FALLING:
+		if(airAccel < MAXAIRACCEL):
+			airAccel += 0.2;
+		move_and_slide(Vector2(0, (60 * fallSpeed) * airAccel)) #the amount of acceleration needs to be adjusted.
+		for i in get_slide_count():
+			var collision = get_slide_collision(i)
+			if collision.collider.name == 'ground': 
+				currentState = STATES.IDLE
+				airAccel = 0;
 
 func animFinished(name):
 	print('animation end', name)
-	changeState(true);
-	
+	if(name == 'jumpUp' || name == 'falling'):
+		currentState = STATES.FALLING
+		return;
+	else: 
+		changeState(true);
+
+func playerJump(height): 
+	jumpHeight = height;
+
 func changeState(defactoState = false):
 	if defactoState: #used by animation end
 		currentState = STATES.IDLE;
@@ -209,6 +251,10 @@ func changeState(defactoState = false):
 			if canKara: 
 				print('kara cancelled?')
 			anim.play('hadouken')
+		5: #jumping
+			anim.play('jumpUp');
+		6: #falling
+			anim.play('falling');
 	
 func moveSetExecute(command): 
 	#check for Kara
@@ -232,11 +278,6 @@ func moveSetExecute(command):
 			chargeBackTimer = MAXCHARGETIME;
 		
 #------------------ Related to interactions 
-func _on_Area2D_body_entered(body):
-	print(body)
-	if body == 'test':
-		switchSides()
-
 #collision detection stuff
 func switchSides():
 	print('switching')
