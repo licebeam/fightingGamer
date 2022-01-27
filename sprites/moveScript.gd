@@ -1,24 +1,33 @@
 extends KinematicBody2D
 
 # externals
-var inputLable;
 var anim;
 var debugLable;
 
 # command related
+const MAXLAG = 0;
+var inputLag = MAXLAG;
+
+var controlsFlipped = false;
 const MAXBUFFER = 8; # frames of total input storage before we delete everything.
 var bufferTime = MAXBUFFER;
 var MAXKARA = 20 # the amount of kara frames needs to be adjusted
 var karaTimer = MAXKARA;
 var canKara = false;
 var inputSequence = [];
+var heldInputSequence = []; #only used for displaying input
 var isForward = false;
 var isBackward = false;
-var commands = {
+var commands; #used to set the flipped commands;
+var commandsRight = {
 	'dash': ['right', 'right'],
 	'dashBack': ['left', 'left'],
 	'hadouL': ['down', 'right', 'lp'],
-	'lpBoom': ['lp', 'right', 'left'],
+};
+var commandsLeft = {
+	'dash': ['left', 'left'],
+	'dashBack': ['right', 'right'],
+	'hadouL': ['down', 'left', 'lp'],
 };
 
 #charge related stuff;
@@ -41,6 +50,8 @@ var isCrouching = false;
 var moveRight = Vector2(200, 0)
 var moveLeft = Vector2(-180, 0)
 
+var health = 820; #820 is default for now, used by rect
+
 #state machine
 enum STATES {IDLE, JAB, STRONG, FIERCE, HADOU, JUMPING, FALLING}
 var currentState = STATES.IDLE;
@@ -49,7 +60,6 @@ var currentState = STATES.IDLE;
 func _ready():
 	# animation player
 	anim = get_node("AnimationPlayer");
-	inputLable = get_node("../../CanvasLayer/inputLabel")
 	anim.connect("animation_finished", self, "animFinished");
 	debugLable = get_node("DebugLabel");
 
@@ -103,16 +113,88 @@ func checkAndClearBuffer(): #this needs to change to pop from the back of the ar
 	if bufferTime <= 0:
 		inputSequence = []; # can set this to empty to clear the display of inputs;
 
-	 
 func getInput():
+	var direction = Vector2();
+	var holdDowns = Vector2();
+	holdDowns.x = int(Input.is_action_just_pressed("right")) - int(Input.is_action_just_pressed("left"))
+	holdDowns.y = int(Input.is_action_pressed("down")) - int(Input.is_action_pressed("up"))
+	
+	var holdRights = Vector2();
+	holdRights.x = int(Input.is_action_pressed("right")) - int(Input.is_action_pressed("left"))
+	holdRights.y = int(Input.is_action_just_pressed("down")) - int(Input.is_action_just_pressed("up"))
+	
+	direction.x = int(Input.is_action_just_pressed("right")) - int(Input.is_action_just_pressed("left"))
+	direction.y = int(Input.is_action_just_pressed("down")) - int(Input.is_action_just_pressed("up"))
+
+	match holdRights:
+		Vector2(-1, -1): 
+			#print('up left')
+			inputLag = 0;
+			heldInputSequence.push_back(6);			
+		Vector2(-1, 1): 
+			#print('down left')
+			inputLag = 0;
+			heldInputSequence.push_back(5);			
+		Vector2(1, -1): 
+			#print('up right')
+			inputLag = 0;
+			heldInputSequence.push_back(7);			
+		Vector2(1, 1): 
+			#print('down right')
+			inputLag = 0;
+			heldInputSequence.push_back(4);	
+			
+	match holdDowns:
+		Vector2(-1, -1): 
+			#print('up left')
+			inputLag = 0;
+			heldInputSequence.push_back(6);			
+		Vector2(-1, 1): 
+			#print('down left')
+			inputLag = 0;
+			heldInputSequence.push_back(5);			
+		Vector2(1, -1): 
+			#print('up right')
+			inputLag = 0;
+			heldInputSequence.push_back(7);			
+		Vector2(1, 1): 
+			#print('down right')
+			inputLag = 0;
+			heldInputSequence.push_back(4);	
+			
+	match direction:	
+		Vector2(1, 0): 
+			#print('right')
+			inputLag = 0;
+			heldInputSequence.push_back(3);
+		Vector2(-1, 0): 
+			#print('left')
+			inputLag = 0;
+			heldInputSequence.push_back(2);
+		Vector2(0, -1): 
+			#print('up')
+			inputLag = 0;
+			heldInputSequence.push_back(0);
+		Vector2(0, 1): 
+			#print('down')
+			inputLag = 0;
+			heldInputSequence.push_back(1);
+		
+#need to clean up the below input functionality! ---------------------------
+	if Input.is_action_just_pressed('up'):
+		inputSequence.push_back('up');
+		
 	if Input.is_action_pressed('up') && currentState == STATES.IDLE:
 		currentState = STATES.JUMPING;
-		
+	
 	if Input.is_action_just_pressed('right'):
-		inputSequence.push_back('right');
-		inputLable.text += 'right '
-		bufferTime = MAXBUFFER;
-		checkCommand()
+		if Input.is_action_just_pressed('up'):
+			inputSequence.push_back('upForward');
+			
+		else: 
+			inputSequence.push_back('right');
+			bufferTime = MAXBUFFER;
+			checkCommand()
 		
 	if Input.is_action_pressed('right') && currentState == STATES.IDLE:
 		if !isCrouching: 
@@ -123,7 +205,6 @@ func getInput():
 		
 	if Input.is_action_just_pressed('left'):
 		inputSequence.push_back('left');
-		inputLable.text += 'left '
 		bufferTime = MAXBUFFER;
 		checkCommand()
 		
@@ -143,7 +224,6 @@ func getInput():
 	if Input.is_action_just_pressed('down'):
 		isCrouching = true;
 		inputSequence.push_back('down');
-		inputLable.text += 'down '
 		bufferTime = MAXBUFFER;
 		checkCommand()
 		
@@ -152,8 +232,11 @@ func getInput():
 		
 	#punches
 	if Input.is_action_just_pressed('lightP'):
+		#test 
+		health -= 20;
+		#
 		inputSequence.push_back('lp');
-		inputLable.text += 'lp '
+		heldInputSequence.push_back(8);
 		bufferTime = MAXBUFFER;
 		yield(checkCommand(), "completed");
 		# may need to yield here before state change
@@ -163,7 +246,7 @@ func getInput():
 			
 	if Input.is_action_just_pressed('medP'):
 		inputSequence.push_back('mp');
-		inputLable.text += 'mp '
+		heldInputSequence.push_back(9);
 		bufferTime = MAXBUFFER;
 		yield(checkCommand(), "completed");
 		# may need to yield here before state change
@@ -184,23 +267,44 @@ func chargeBack():
 		isChargedBack = true;
 		chargeBackTimer = 0;
 		print('charged')
-		
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	debugLable.text = str(currentState)
-	getInput()
-	checkAndClearBuffer()
+
+func _physics_process(delta):
 		
 	for i in get_slide_count():
 		var collision = get_slide_collision(i)
+		var middle = (position.x + collision.collider.position.x) / 2
 		if collision.collider.name == 'test': 
 			switchSides();
-	
+		if collision.collider.name == 'fake2pNode' && currentState == STATES.FALLING: 
+			if middle >= position.x: 
+				move_and_collide(Vector2(-1, 0))
+				collision.collider.move_and_collide(Vector2(1, 0))
+			else: 
+				move_and_collide(Vector2(1, 0))
+				collision.collider.move_and_collide(Vector2(-1, 0))
+		#handle walk pushing
+		#if collision.collider.name == 'fake2pNode' && currentState != STATES.FALLING: 
+			#print(collision.collider.name)
+			#if middle >= position.x: 
+				#collision.collider.move_and_collide(Vector2(1, 0))
+			#else: 
+				#collision.collider.move_and_collide(Vector2(-1, 0))	
+				
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta):
+	debugLable.text = str(currentState)
+	if(inputLag >= MAXLAG):
+		getInput()
+	if(inputLag <= MAXLAG): 
+		inputLag += 1;
+	checkAndClearBuffer()
+
 	if canKara: 
 		checkAndClearKara();
 		
 	changeState();
 	handleJumpState();
+	switchSides();
 #-------------------------------------------
 
 func handleJumpState():
@@ -236,6 +340,7 @@ func handleJumpState():
 			move_and_slide(Vector2(0, (60 * fallSpeed) * airAccel)) #the amount of acceleration needs to be adjusted.
 		for i in get_slide_count():
 			var collision = get_slide_collision(i)
+			print('collision', collision.collider.name)
 			if collision.collider.name == 'ground': 
 				currentState = STATES.IDLE
 				airAccel = 0;
@@ -293,8 +398,18 @@ func moveSetExecute(command):
 			chargeBackTimer = MAXCHARGETIME;
 		
 #------------------ Related to interactions 
-#collision detection stuff
+
 func switchSides():
-	print('switching')
+	var camera = get_node('../CameraController');
+	if(position.x > camera.position.x):
+		var sprite = get_node("playerSprite")
+		commands = commandsLeft;
+		controlsFlipped = true;
+		sprite.set_flip_h(true);
+	else: 
+		var sprite = get_node("playerSprite")
+		commands = commandsRight;
+		controlsFlipped = false;
+		sprite.set_flip_h(false);
 		
 ## functions related to actual actions

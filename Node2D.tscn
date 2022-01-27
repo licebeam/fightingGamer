@@ -1,21 +1,22 @@
-[gd_scene load_steps=31 format=2]
+[gd_scene load_steps=29 format=2]
 
 [ext_resource path="res://shaders/crt_shader.shader" type="Shader" id=1]
 [ext_resource path="res://sprites/someDude.png" type="Texture" id=2]
 [ext_resource path="res://sprites/moveScript.gd" type="Script" id=3]
-[ext_resource path="res://scripts/inputLabel.gd" type="Script" id=4]
 [ext_resource path="res://sprites/fixedBG.png" type="Texture" id=5]
-[ext_resource path="res://Pixolletta8px.ttf" type="DynamicFontData" id=6]
 [ext_resource path="res://MOCKUP1.png" type="Texture" id=7]
 [ext_resource path="res://sprites/Timer.png" type="Texture" id=8]
 [ext_resource path="res://scripts/TimerObject.gd" type="Script" id=9]
 [ext_resource path="res://scripts/TimerSprite.gd" type="Script" id=10]
 [ext_resource path="res://scripts/CameraController.gd" type="Script" id=11]
+[ext_resource path="res://healthBarScript.gd" type="Script" id=12]
+[ext_resource path="res://inputDisplay.gd" type="Script" id=13]
 
 [sub_resource type="ShaderMaterial" id=6]
 
-[sub_resource type="RectangleShape2D" id=7]
-extents = Vector2( 16, 21.5 )
+[sub_resource type="CapsuleShape2D" id=27]
+radius = 8.0
+height = 30.0
 
 [sub_resource type="Animation" id=26]
 resource_name = "falling"
@@ -156,8 +157,9 @@ extents = Vector2( 20, 111.5 )
 [sub_resource type="RectangleShape2D" id=23]
 extents = Vector2( 14.75, 118.5 )
 
-[sub_resource type="RectangleShape2D" id=20]
-extents = Vector2( 10, 18.5 )
+[sub_resource type="CapsuleShape2D" id=28]
+radius = 8.0
+height = 30.0
 
 [sub_resource type="RectangleShape2D" id=18]
 extents = Vector2( 230, 9.5 )
@@ -170,14 +172,6 @@ extents = Vector2( 8.75, 122.25 )
 
 [sub_resource type="RectangleShape2D" id=14]
 extents = Vector2( 6.5, 119.5 )
-
-[sub_resource type="DynamicFont" id=16]
-size = 10
-font_data = ExtResource( 6 )
-
-[sub_resource type="Theme" id=17]
-Label/colors/font_color = Color( 1, 1, 1, 1 )
-Label/fonts/font = SubResource( 16 )
 
 [sub_resource type="ShaderMaterial" id=24]
 shader = ExtResource( 1 )
@@ -213,8 +207,8 @@ texture = ExtResource( 2 )
 hframes = 3
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="TheGame/player1"]
-position = Vector2( -19, 89.5 )
-shape = SubResource( 7 )
+position = Vector2( -19, 88 )
+shape = SubResource( 27 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="TheGame/player1"]
 autoplay = "idle"
@@ -261,9 +255,9 @@ shape = SubResource( 23 )
 [node name="fake2pNode" type="KinematicBody2D" parent="TheGame"]
 position = Vector2( 482, 204 )
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="TheGame/fake2pNode"]
-position = Vector2( -33, 89.5 )
-shape = SubResource( 20 )
+[node name="playerBox" type="CollisionShape2D" parent="TheGame/fake2pNode"]
+position = Vector2( -33, 88 )
+shape = SubResource( 28 )
 
 [node name="Sprite" type="Sprite" parent="TheGame/fake2pNode"]
 position = Vector2( -33, 79 )
@@ -297,38 +291,6 @@ shape = SubResource( 14 )
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 follow_viewport_scale = 0.001
-
-[node name="inputLabel" type="Label" parent="CanvasLayer"]
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_right = -225.0
-margin_bottom = -1.0
-theme = SubResource( 17 )
-text = "right "
-valign = 1
-autowrap = true
-uppercase = true
-script = ExtResource( 4 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer"]
-anchor_right = 1.004
-anchor_bottom = 1.0
-margin_left = 1726.0
-margin_top = 45.0
-margin_right = 1725.98
-margin_bottom = 46.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Label" type="Label" parent="CanvasLayer/MarginContainer"]
-margin_top = 65.0
-margin_right = 257.0
-margin_bottom = 79.0
-text = "qweqweqweqweqew"
 
 [node name="UIMOCK" type="Sprite" parent="CanvasLayer"]
 position = Vector2( 128, 72 )
@@ -369,6 +331,31 @@ offset = Vector2( 3, 0 )
 hframes = 11
 frame = 1
 script = ExtResource( 10 )
+
+[node name="healthBar1" type="Node" parent="CanvasLayer"]
+script = ExtResource( 12 )
+
+[node name="orangeHealth" type="ColorRect" parent="CanvasLayer/healthBar1"]
+margin_left = 11.0
+margin_top = 11.0
+margin_right = 93.0
+margin_bottom = 20.0
+color = Color( 1, 0.917647, 0.584314, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="orangeHealth2" type="ColorRect" parent="CanvasLayer/healthBar1/orangeHealth"]
+show_behind_parent = true
+margin_right = 82.0
+margin_bottom = 9.0
+color = Color( 0.917647, 0.121569, 0.0196078, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="inputHandlerUI" type="Node2D" parent="CanvasLayer"]
+script = ExtResource( 13 )
 
 [node name="BACKGROUND" type="Node2D" parent="."]
 
