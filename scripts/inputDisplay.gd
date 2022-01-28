@@ -19,6 +19,7 @@ func killLast(): # need to fix this jarring graphical issue moves before destroy
 	var lastChild = self.get_child(self.get_child_count()-1)
 	lastChild.queue_free()
 	remove_child(lastChild)
+	# ^ this somehow causes a memory leak TODO
 	inputSequence.pop_front();
 	timer = TIMERMAX;
 	for child in self.get_children():

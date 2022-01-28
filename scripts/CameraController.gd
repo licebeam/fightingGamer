@@ -13,12 +13,12 @@ var airBorne = false;
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	p1Pos = get_node('../player1').position;
-	p2Pos = get_node('../fake2pNode').position;
+	p2Pos = get_node('../player2').position;
 	middle = (p1Pos.x + p2Pos.x) / 2
 
 func calculateCenter():
 	p1Pos = get_node('../player1').position;
-	p2Pos = get_node('../fake2pNode').position;
+	p2Pos = get_node('../player2').position;
 	middle = (p1Pos.x + p2Pos.x) / 2
 	airBorne = round(p1Pos.y) != round(p2Pos.y);
 	# print()
