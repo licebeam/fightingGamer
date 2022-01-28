@@ -424,30 +424,29 @@ func _process(delta):
 func handleJumpState():
 		#handle jump state 
 	if (jumpHeight >= 7) && (jumpAttack || currentState == STATES.JUMPING || currentState == STATES.JUMPDIAG): 
-		jumpHeight -= 1;
-		print(currentState)
 		if(airAccel < MAXAIRACCEL):
 			airAccel += 0.15;
-		if(isForward && currentState == STATES.JUMPDIAG):
+		if(isForward && (currentState == STATES.JUMPDIAG || jumpAttack)):
 			move_and_slide(Vector2(JUMPDIAGSPEED, (-60 * jumpSpeed) / airAccel))
-		elif(isBackward && currentState == STATES.JUMPDIAG):
+		elif(isBackward && (currentState == STATES.JUMPDIAG || jumpAttack)):
 			move_and_slide(Vector2(-JUMPDIAGSPEED, (-60 * jumpSpeed) / airAccel))
 		else: 
 			move_and_slide(Vector2(0, (-60 * jumpSpeed) / airAccel))
 		#self.position.y -= (1 * jumpSpeed) / airAccel; original jump code, move_and_slide uses delta
+		jumpHeight -= 1;
 		
 	if(jumpHeight >= 0 && jumpHeight <= 6): #hang time + move left and right on jump
-		jumpHeight -= 1
 		airAccel += 0.05;
-		if(isForward && currentState == STATES.JUMPDIAG):
+		if(isForward && (currentState == STATES.JUMPDIAG || jumpAttack)):
 			move_and_slide(Vector2(JUMPDIAGSPEED, 0))
-		elif(isBackward && currentState == STATES.JUMPDIAG):
+		elif(isBackward && (currentState == STATES.JUMPDIAG || jumpAttack)):
 			move_and_slide(Vector2(-JUMPDIAGSPEED, 0))
+		jumpHeight -= 1
 			
 	if jumpHeight == 0:
 		airAccel = 0;
 		
-	if jumpHeight <= 0 && (currentState == STATES.FALLING):
+	if jumpHeight <= 0 && (currentState == STATES.FALLING || jumpAttack):
 		if(airAccel < MAXAIRACCEL):
 			airAccel += 0.18;
 		if(isForward):
