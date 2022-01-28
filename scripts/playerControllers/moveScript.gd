@@ -44,6 +44,9 @@ var commandsLeft = {
 	'hadouL': ['down', 'left', 'lp'],
 };
 
+#testing
+var jumpAttack = false;
+
 #charge related stuff;
 const MAXCHARGETIME = 60;
 var chargeBackTimer = MAXCHARGETIME;
@@ -84,6 +87,7 @@ enum STATES {
 	JUMPDIAG,
 	DASHF,
 	DASHB,
+	CROUCHJAB,
 }
 var currentState = STATES.IDLE;
 
@@ -304,6 +308,8 @@ func getInput():
 	#input releases 			
 	if Input.is_action_just_released(keys.down): 
 		isCrouching = false;
+		if currentState == STATES.CROUCH: 
+			currentState = STATES.IDLE
 		
 	if ((Input.is_action_just_released(keys.left) || Input.is_action_just_released(keys.right)) && currentState == STATES.WALK):
 		#print(anim.current_animation_position)
@@ -318,15 +324,23 @@ func getInput():
 	#punches
 	if Input.is_action_just_pressed(keys.lp):
 		#test 
-		health -= 40;
+		# health -= 40;
 		#
 		inputSequence.push_back('lp');
 		heldInputSequence.push_back(8);
 		bufferTime = MAXBUFFER;
 		yield(checkCommand(), "completed");
-		# may need to yield here before state change
-		if currentState == STATES.IDLE || currentState == STATES.WALK: #this checks to make sure we are not already doing some command.
-			currentState = STATES.JAB;
+		# check jump
+		if !jumpAttack && (currentState == STATES.JUMPING || currentState == STATES.FALLING || currentState == STATES.JUMPDIAG): #this checks to make sure we are not already doing some command.
+			jumpAttack = true;
+			anim.play('jumpJab')
+			#canKara = true;
+		# check stand / crouch / walk
+		if currentState == STATES.IDLE || currentState == STATES.WALK || currentState == STATES.CROUCH: #this checks to make sure we are not already doing some command.
+			if isCrouching: 
+				currentState = STATES.CROUCHJAB;
+			else: 
+				currentState = STATES.JAB;
 			canKara = true;
 			
 	if Input.is_action_just_pressed(keys.mp):
@@ -409,8 +423,9 @@ func _process(delta):
 
 func handleJumpState():
 		#handle jump state 
-	if(jumpHeight >= 8) && (currentState == STATES.JUMPING || currentState == STATES.JUMPDIAG): 
+	if (jumpHeight >= 7) && (jumpAttack || currentState == STATES.JUMPING || currentState == STATES.JUMPDIAG): 
 		jumpHeight -= 1;
+		print(currentState)
 		if(airAccel < MAXAIRACCEL):
 			airAccel += 0.15;
 		if(isForward && currentState == STATES.JUMPDIAG):
@@ -421,17 +436,20 @@ func handleJumpState():
 			move_and_slide(Vector2(0, (-60 * jumpSpeed) / airAccel))
 		#self.position.y -= (1 * jumpSpeed) / airAccel; original jump code, move_and_slide uses delta
 		
-	if(jumpHeight >= 0 && jumpHeight <= 7): #hang time + move left and right on jump
+	if(jumpHeight >= 0 && jumpHeight <= 6): #hang time + move left and right on jump
 		jumpHeight -= 1
-		airAccel = 0;
+		airAccel += 0.05;
 		if(isForward && currentState == STATES.JUMPDIAG):
 			move_and_slide(Vector2(JUMPDIAGSPEED, 0))
 		elif(isBackward && currentState == STATES.JUMPDIAG):
 			move_and_slide(Vector2(-JUMPDIAGSPEED, 0))
+			
+	if jumpHeight == 0:
+		airAccel = 0;
 		
-	if jumpHeight <= 0 && currentState == STATES.FALLING:
+	if jumpHeight <= 0 && (currentState == STATES.FALLING):
 		if(airAccel < MAXAIRACCEL):
-			airAccel += 0.2;
+			airAccel += 0.18;
 		if(isForward):
 			move_and_slide(Vector2(JUMPDIAGSPEED, (60 * fallSpeed) * airAccel)) #the amount of acceleration needs to be adjusted.
 		elif(isBackward):
@@ -445,17 +463,18 @@ func handleJumpState():
 				currentState = STATES.IDLE
 				isForward = false;
 				isBackward = false;
+				jumpAttack = false;
 				airAccel = 0;
 
 func animFinished(name):
 	# print('animation end', name)
-	if(name == 'jumpUp' || name == 'jumpDiag' || name == 'falling'): # whatever animation that ends where we don't IDLE
+	if(name == 'jumpUp' || name == 'jumpDiag' || name == 'falling' || name == 'jumpJab'): # whatever animation that ends where we don't IDLE
 		currentState = STATES.FALLING
 		return;
 	else: 
 		changeState(true);
 
-func playerJump(height): 
+func playerJump(height): #used by animator to set the jump frames
 	jumpHeight = height;
 
 func changeState(defactoState = false):
@@ -476,8 +495,12 @@ func changeState(defactoState = false):
 				#print('kara cancelled?')
 			anim.play('hadouken')
 		5: #jumping
+			if(jumpAttack):
+				return;
 			anim.play('jumpUp');
 		6: #falling
+			if(jumpAttack):
+				return;
 			anim.play('falling');
 		7: #short
 			anim.play('short');
@@ -490,6 +513,8 @@ func changeState(defactoState = false):
 		11: #walk:
 			anim.play('walk');
 		12: #jump diag
+			if(jumpAttack):
+				return;
 			anim.play('jumpDiag');
 		13: #dash f
 			anim.play('dash');
@@ -503,6 +528,8 @@ func changeState(defactoState = false):
 				move_and_slide(Vector2(DASHBACK, 0))
 			else: 
 				move_and_slide(Vector2(-DASHBACK, 0))
+		15: # crouch jab
+			anim.play('crouchJab')
 			
 func moveSetExecute(command): 
 	if command == 'dash' && (currentState == STATES.IDLE || currentState == STATES.WALK):
@@ -527,15 +554,16 @@ func moveSetExecute(command):
 
 func switchSides():
 	var camera = get_node('../CameraController');
-	if(position.x > camera.position.x):
-		var sprite = get_node("playerSprite")
-		commands = commandsLeft;
-		controlsFlipped = true;
-		sprite.set_flip_h(true);
-	else: 
-		var sprite = get_node("playerSprite")
-		commands = commandsRight;
-		controlsFlipped = false;
-		sprite.set_flip_h(false);
+	if(!jumpAttack):
+		if position.x > camera.position.x:
+			var sprite = get_node("playerSprite")
+			commands = commandsLeft;
+			controlsFlipped = true;
+			sprite.set_flip_h(true);
+		else: 
+			var sprite = get_node("playerSprite")
+			commands = commandsRight;
+			controlsFlipped = false;
+			sprite.set_flip_h(false);
 		
 ## functions related to actual actions

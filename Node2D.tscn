@@ -1,4 +1,4 @@
-[gd_scene load_steps=50 format=2]
+[gd_scene load_steps=52 format=2]
 
 [ext_resource path="res://shaders/crt_shader.shader" type="Shader" id=1]
 [ext_resource path="res://sprites/TerryB2.png" type="Texture" id=2]
@@ -23,6 +23,7 @@ height = 30.0
 [sub_resource type="Animation" id=31]
 resource_name = "crouch"
 length = 0.0166667
+loop = true
 step = 0.0166667
 tracks/0/type = "value"
 tracks/0/path = NodePath("playerSprite:frame")
@@ -35,6 +36,23 @@ tracks/0/keys = {
 "transitions": PoolRealArray( 1 ),
 "update": 1,
 "values": [ 4 ]
+}
+
+[sub_resource type="Animation" id=49]
+resource_name = "crouchJab"
+length = 0.133333
+step = 0.0166667
+tracks/0/type = "value"
+tracks/0/path = NodePath("playerSprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.0333333 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 1,
+"values": [ 27, 28 ]
 }
 
 [sub_resource type="Animation" id=34]
@@ -233,6 +251,23 @@ tracks/1/keys = {
 "transitions": PoolRealArray( 1, 1, 1, 1, 1, 1 ),
 "update": 1,
 "values": [ 9, 11, 12, 13, 14, 10 ]
+}
+
+[sub_resource type="Animation" id=50]
+resource_name = "jumpJab"
+length = 0.166667
+step = 0.0166667
+tracks/0/type = "value"
+tracks/0/path = NodePath("playerSprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0.0333333 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ 38 ]
 }
 
 [sub_resource type="Animation" id=25]
@@ -667,6 +702,7 @@ material = SubResource( 6 )
 position = Vector2( -20, 79 )
 texture = ExtResource( 4 )
 hframes = 39
+frame = 38
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="TheGame/player1"]
 position = Vector2( -22, 88 )
@@ -675,6 +711,7 @@ shape = SubResource( 27 )
 [node name="AnimationPlayer" type="AnimationPlayer" parent="TheGame/player1"]
 autoplay = "idle"
 anims/crouch = SubResource( 31 )
+anims/crouchJab = SubResource( 49 )
 anims/dash = SubResource( 34 )
 anims/dashBack = SubResource( 35 )
 anims/falling = SubResource( 26 )
@@ -683,6 +720,7 @@ anims/hadouken = SubResource( 11 )
 anims/idle = SubResource( 9 )
 anims/jab = SubResource( 10 )
 anims/jumpDiag = SubResource( 33 )
+anims/jumpJab = SubResource( 50 )
 anims/jumpUp = SubResource( 25 )
 anims/short = SubResource( 29 )
 anims/strong = SubResource( 15 )
@@ -707,6 +745,7 @@ material = SubResource( 6 )
 position = Vector2( -20, 79 )
 texture = ExtResource( 2 )
 hframes = 39
+frame = 4
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="TheGame/player2"]
 position = Vector2( -22, 88 )
@@ -746,7 +785,6 @@ current = true
 limit_left = 182
 limit_right = 628
 smoothing_enabled = true
-smoothing_speed = 10.0
 editor_draw_limits = true
 
 [node name="topBoxCam" type="CollisionShape2D" parent="TheGame/CameraController"]

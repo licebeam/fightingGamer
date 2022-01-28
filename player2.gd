@@ -13,7 +13,7 @@ func _ready():
 		'down': 'p2down',
 		'left': 'p2left', 
 		'right': 'p2right',
-		'lp': 'lightP',
+		'lp': 'p2lightP',
 		'mp': 'medP',
 		'hp': 'hardP',
 		'lk': 'lightK',
