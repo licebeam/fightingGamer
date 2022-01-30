@@ -1028,7 +1028,7 @@ position = Vector2( -23, 84 )
 shape = SubResource( 51 )
 
 [node name="player2" type="KinematicBody2D" parent="TheGame"]
-position = Vector2( 390, 204 )
+position = Vector2( 464, 204 )
 z_index = 1
 script = ExtResource( 6 )
 
