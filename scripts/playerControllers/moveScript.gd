@@ -488,6 +488,7 @@ func handleHits():
 				knockBackDistance = 0;
 				knockBackDistanceSelf = 0;
 				enemyInstance.health -= 10;
+				sparkAnim.play('spark')
 								
 func _physics_process(delta):
 	for i in get_slide_count():

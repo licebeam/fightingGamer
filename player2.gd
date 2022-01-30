@@ -21,6 +21,7 @@ func _ready():
 		'hk': 'hardK',
 	}
 	enemy = 'player1'
+	hitBox = get_node("hitArea2/hitBox");
 	boxAreaHit = get_node("hitArea2")
 	boxAreaHurt = get_node("hurtArea")
 	enemyInstance = get_node('../player1');
