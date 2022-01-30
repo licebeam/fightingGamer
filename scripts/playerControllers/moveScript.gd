@@ -671,7 +671,7 @@ func switchSides():
 		if position.x > camera.position.x:
 			var sprite = get_node("playerSprite")
 			commands = commandsLeft;
-			boxAreaHit.position.x = -52
+			boxAreaHit.position.x = -52 # TODO these numbers need to be accurate.
 			controlsFlipped = true;
 			sprite.set_flip_h(true);
 			if(hitSparks):
