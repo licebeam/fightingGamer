@@ -1,5 +1,7 @@
 extends KinematicBody2D
 
+const FRAMES_PER_MS = 0.06;
+
 var keys = {
 	'up': 'up',
 	'down': 'down',
@@ -12,12 +14,19 @@ var keys = {
 	'mk': 'medK',
 	'hk': 'hardK',
 }
-var enemy = 'player2'
 
+var enemy = 'player2'
+var enemyInstance;
 # externals
 var anim;
 var debugLable;
-
+var enemyHurtBox; 
+var enemyHitBox;
+var boxAreaHit;
+var boxAreaHurt;
+var hitBox;
+var sparkAnim;
+var hitSparks;
 # command related
 # const MAXLAG = 2;
 # var inputLag = MAXLAG;
@@ -46,6 +55,11 @@ var commandsLeft = {
 
 #testing
 var jumpAttack = false;
+var canChain = false;
+var recoveryFrames = 0;
+var knockBackDistance = 0;
+var knockBackDistanceSelf = 0;
+var hitRecovery = 0;
 
 #charge related stuff;
 const MAXCHARGETIME = 60;
@@ -70,6 +84,8 @@ var moveLeft = Vector2(-90, 0)
 
 var health = 820; #820 is default for now, used by rect
 
+var comboCounter = 0;
+
 #state machine
 enum STATES {
 	IDLE,
@@ -88,6 +104,7 @@ enum STATES {
 	DASHF,
 	DASHB,
 	CROUCHJAB,
+	HURT, #took damage
 }
 var currentState = STATES.IDLE;
 
@@ -97,6 +114,9 @@ func _ready():
 	anim = get_node("AnimationPlayer");
 	anim.connect("animation_finished", self, "animFinished");
 	debugLable = get_node("DebugLabel");
+	sparkAnim = get_node("sparkSpawn/hitSparks/sparkAnim");
+	hitSparks = get_node("sparkSpawn");
+
 
 #function specifically for moving during an animation frame. used by the animation player
 func moveViaAnimation(amount): #change to pixels eventually
@@ -339,7 +359,7 @@ func getInput():
 		if currentState == STATES.IDLE || currentState == STATES.WALK || currentState == STATES.CROUCH: #this checks to make sure we are not already doing some command.
 			if isCrouching: 
 				currentState = STATES.CROUCHJAB;
-			else: 
+			else:
 				currentState = STATES.JAB;
 			canKara = true;
 			
@@ -387,10 +407,92 @@ func chargeBack():
 		chargeBackTimer = 0;
 		#print('charged')
 
-func _physics_process(delta):
+func knockBack(num): 
+	var camera = get_node('../CameraController');
+	if position.x < camera.position.x:
+		knockBackDistance = num;
+		knockBackDistanceSelf = -num; #may need to change;
+	else:  
+		knockBackDistance = -num;
+		knockBackDistanceSelf = num; #may need to change;
+			
+func setHitRecovery(num): 
+	hitRecovery = num;
+	
+func allowChain():
+	canChain = true;
+	
+func disableChain():
+	canChain = false;
+	
+func checkChainAttacks(): # need to fix this. TODO !!!
+	if Input.is_action_just_pressed(keys.lp):
+		anim.stop()
+		disableChain(); 
+		print('chained lp')
+		inputSequence.push_back('lp');
+		heldInputSequence.push_back(8);
+		bufferTime = MAXBUFFER;
+		#currentState = STATES.IDLE;
+		if isCrouching: 
+			currentState = STATES.CROUCHJAB;
+		else: 
+			currentState = STATES.JAB;
+		canKara = true;
+		canChain = false;
 		
+func hitStop(timeScale, duration): 
+	# this is not exactly what i want for hitstop but works for now.
+	Engine.time_scale = timeScale;
+	yield(get_tree().create_timer(duration * timeScale), 'timeout');
+	Engine.time_scale = 1.0;
+
+func handleHits():
+	if enemyInstance.currentState != STATES.HURT: #don't allow chains when not hitting
+		disableChain(); # hmmm not sure if it's working perfectly yet
+		# need to check if the player already cannot hit the opponent.
+	#handle hit detection.
+	if(boxAreaHit):
+		var test = boxAreaHit.get_overlapping_areas()
+		if(test.size() >= 1):
+			if(test[0].name == 'hurtArea2' && enemy == 'player2'):
+				enemyInstance.anim.stop();
+				hitStop(0.2, 0.16);
+				enemyInstance.currentState = STATES.HURT;
+				enemyInstance.recoveryFrames = hitRecovery;
+				#not a perfect solution to changing animation to match recovery speed
+				var toDelay = (hitRecovery * FRAMES_PER_MS ) + enemyInstance.anim.current_animation_length
+				enemyInstance.anim.playback_speed = 1 / toDelay
+				comboCounter += 1;
+				hitBox.disabled = true;
+				enemyInstance.move_and_slide(Vector2(knockBackDistance, 0));
+				move_and_slide(Vector2(knockBackDistanceSelf, 0));
+				knockBackDistance = 0;
+				knockBackDistanceSelf = 0;
+				enemyInstance.health -= 10;
+				sparkAnim.play('spark')
+				
+		if(test.size() >= 1):
+			if(test[0].name == 'hurtArea1' && enemy == 'player1'):
+				enemyInstance.anim.stop();
+				hitStop(0.2, 0.16);
+				enemyInstance.currentState = STATES.HURT;
+				enemyInstance.recoveryFrames = hitRecovery;
+				#not a perfect solution to changing animation to match recovery speed
+				var toDelay = (hitRecovery * FRAMES_PER_MS ) + enemyInstance.anim.current_animation_length
+				enemyInstance.anim.playback_speed = 1 / toDelay
+				comboCounter += 1;
+				hitBox.disabled = true;
+				enemyInstance.move_and_slide(Vector2(knockBackDistance, 0));
+				move_and_slide(Vector2(knockBackDistanceSelf, 0));
+				knockBackDistance = 0;
+				knockBackDistanceSelf = 0;
+				enemyInstance.health -= 10;
+								
+func _physics_process(delta):
 	for i in get_slide_count():
 		var collision = get_slide_collision(i)
+		# print(collision.collider.name);
 		var middle = (position.x + collision.collider.position.x) / 2
 		if collision.collider.name == enemy && currentState == STATES.FALLING: 
 			if middle >= position.x: 
@@ -409,6 +511,7 @@ func _physics_process(delta):
 				
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
+	handleHits();
 	# debugLable.text = str(currentState)
 	getInput()
 	checkAndClearBuffer()
@@ -419,6 +522,15 @@ func _process(delta):
 	changeState();
 	handleJumpState();
 	switchSides();
+	#chain attacks
+	if canChain:
+		checkChainAttacks();
+	if enemyInstance.recoveryFrames >= 1:
+		enemyInstance.recoveryFrames -= 1;
+	elif enemyInstance.recoveryFrames <= 0: 
+		enemyInstance.recoveryFrames = 0;
+		comboCounter = 0;
+		enemyInstance.anim.playback_speed = 1
 #-------------------------------------------
 
 func handleJumpState():
@@ -529,6 +641,8 @@ func changeState(defactoState = false):
 				move_and_slide(Vector2(-DASHBACK, 0))
 		15: # crouch jab
 			anim.play('crouchJab')
+		16: #hurt animation;
+			anim.play('hurt')
 			
 func moveSetExecute(command): 
 	if command == 'dash' && (currentState == STATES.IDLE || currentState == STATES.WALK):
@@ -557,12 +671,18 @@ func switchSides():
 		if position.x > camera.position.x:
 			var sprite = get_node("playerSprite")
 			commands = commandsLeft;
+			boxAreaHit.position.x = -52
 			controlsFlipped = true;
 			sprite.set_flip_h(true);
+			if(hitSparks):
+				hitSparks.position = boxAreaHit.position;
 		else: 
 			var sprite = get_node("playerSprite")
 			commands = commandsRight;
+			boxAreaHit.position.x = 3
 			controlsFlipped = false;
 			sprite.set_flip_h(false);
+			if(hitSparks):
+				hitSparks.position = boxAreaHit.position;
 		
 ## functions related to actual actions

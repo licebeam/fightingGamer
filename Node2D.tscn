@@ -1,7 +1,7 @@
-[gd_scene load_steps=52 format=2]
+[gd_scene load_steps=59 format=2]
 
 [ext_resource path="res://shaders/crt_shader.shader" type="Shader" id=1]
-[ext_resource path="res://sprites/TerryB2.png" type="Texture" id=2]
+[ext_resource path="res://HitSpark1.png" type="Texture" id=2]
 [ext_resource path="res://player1.gd" type="Script" id=3]
 [ext_resource path="res://sprites/TerryB.png" type="Texture" id=4]
 [ext_resource path="res://sprites/fixedBG.png" type="Texture" id=5]
@@ -53,6 +53,49 @@ tracks/0/keys = {
 "transitions": PoolRealArray( 1, 1 ),
 "update": 1,
 "values": [ 27, 28 ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("hitArea1/hitBox:disabled")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0.0333333, 0.116667 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 1,
+"values": [ false, true ]
+}
+tracks/2/type = "method"
+tracks/2/path = NodePath(".")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0.0333333 ),
+"transitions": PoolRealArray( 1 ),
+"values": [ {
+"args": [ 400 ],
+"method": "knockBack"
+} ]
+}
+tracks/3/type = "method"
+tracks/3/path = NodePath(".")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"times": PoolRealArray( 0, 0.0833333 ),
+"transitions": PoolRealArray( 1, 1 ),
+"values": [ {
+"args": [ 16 ],
+"method": "setHitRecovery"
+}, {
+"args": [  ],
+"method": "allowChain"
+} ]
 }
 
 [sub_resource type="Animation" id=34]
@@ -173,6 +216,23 @@ tracks/0/keys = {
 "values": [ 0, 2 ]
 }
 
+[sub_resource type="Animation" id=68]
+resource_name = "hurt"
+length = 0.2
+step = 0.0166667
+tracks/0/type = "value"
+tracks/0/path = NodePath("playerSprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.05, 0.1, 0.15 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"update": 1,
+"values": [ 39, 40, 41, 42 ]
+}
+
 [sub_resource type="Animation" id=9]
 resource_name = "idle"
 length = 0.466668
@@ -207,18 +267,50 @@ tracks/0/keys = {
 "update": 1,
 "values": [ 0, 17, 16 ]
 }
-tracks/1/type = "method"
-tracks/1/path = NodePath(".")
+tracks/1/type = "value"
+tracks/1/path = NodePath("hitArea1/hitBox:disabled")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/imported = false
 tracks/1/enabled = true
 tracks/1/keys = {
-"times": PoolRealArray( 0.0333333 ),
+"times": PoolRealArray( 0.0666667, 0.183333 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 1,
+"values": [ false, true ]
+}
+tracks/2/type = "method"
+tracks/2/path = NodePath(".")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0, 0.116667, 0.183333 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"values": [ {
+"args": [ 24 ],
+"method": "setHitRecovery"
+}, {
+"args": [  ],
+"method": "allowChain"
+}, {
+"args": [  ],
+"method": "disableChain"
+} ]
+}
+tracks/3/type = "method"
+tracks/3/path = NodePath(".")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"times": PoolRealArray( 0.0666667 ),
 "transitions": PoolRealArray( 1 ),
 "values": [ {
-"args": [ 60 ],
-"method": "moveViaAnimation"
+"args": [ 300 ],
+"method": "knockBack"
 } ]
 }
 
@@ -352,9 +444,32 @@ tracks/0/keys = {
 "values": [ 5, 6, 7, 8 ]
 }
 
-[sub_resource type="Animation" id=36]
+[sub_resource type="Animation" id=85]
+resource_name = "spark"
+length = 0.0833333
+step = 0.0166667
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.0166667, 0.0333333, 0.05, 0.0666667 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1 ),
+"update": 1,
+"values": [ 0, 1, 2, 3, 4 ]
+}
+
+[sub_resource type="RectangleShape2D" id=52]
+extents = Vector2( 10.25, 7.25 )
+
+[sub_resource type="RectangleShape2D" id=51]
+
+[sub_resource type="Animation" id=69]
 resource_name = "crouch"
 length = 0.0166667
+loop = true
 step = 0.0166667
 tracks/0/type = "value"
 tracks/0/path = NodePath("playerSprite:frame")
@@ -369,7 +484,24 @@ tracks/0/keys = {
 "values": [ 4 ]
 }
 
-[sub_resource type="Animation" id=37]
+[sub_resource type="Animation" id=70]
+resource_name = "crouchJab"
+length = 0.133333
+step = 0.0166667
+tracks/0/type = "value"
+tracks/0/path = NodePath("playerSprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.0333333 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 1,
+"values": [ 27, 28 ]
+}
+
+[sub_resource type="Animation" id=71]
 resource_name = "dash"
 length = 0.266667
 step = 0.0166667
@@ -403,7 +535,7 @@ tracks/1/keys = {
 } ]
 }
 
-[sub_resource type="Animation" id=38]
+[sub_resource type="Animation" id=72]
 resource_name = "dashBack"
 length = 0.216667
 step = 0.0166667
@@ -437,7 +569,7 @@ tracks/1/keys = {
 } ]
 }
 
-[sub_resource type="Animation" id=39]
+[sub_resource type="Animation" id=73]
 resource_name = "falling"
 length = 0.533333
 step = 0.0166667
@@ -454,7 +586,7 @@ tracks/0/keys = {
 "values": [ 9 ]
 }
 
-[sub_resource type="Animation" id=40]
+[sub_resource type="Animation" id=74]
 resource_name = "forward"
 length = 0.3
 step = 0.0166667
@@ -471,7 +603,7 @@ tracks/0/keys = {
 "values": [ 0, 20, 22, 20 ]
 }
 
-[sub_resource type="Animation" id=41]
+[sub_resource type="Animation" id=75]
 resource_name = "hadouken"
 step = 0.128982
 tracks/0/type = "value"
@@ -487,7 +619,24 @@ tracks/0/keys = {
 "values": [ 0, 2 ]
 }
 
-[sub_resource type="Animation" id=42]
+[sub_resource type="Animation" id=76]
+resource_name = "hurt"
+length = 0.2
+step = 0.0166667
+tracks/0/type = "value"
+tracks/0/path = NodePath("playerSprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.05, 0.1, 0.15 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"update": 1,
+"values": [ 39, 40, 41, 42 ]
+}
+
+[sub_resource type="Animation" id=77]
 resource_name = "idle"
 length = 0.466668
 loop = true
@@ -505,7 +654,7 @@ tracks/0/keys = {
 "values": [ 0, 1, 2, 3, 2, 1, 0 ]
 }
 
-[sub_resource type="Animation" id=43]
+[sub_resource type="Animation" id=78]
 resource_name = "jab"
 length = 0.2
 step = 0.0166667
@@ -535,8 +684,58 @@ tracks/1/keys = {
 "method": "moveViaAnimation"
 } ]
 }
+tracks/2/type = "value"
+tracks/2/path = NodePath("hitArea2/hitBox:disabled")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0.0666667, 0.15 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 1,
+"values": [ false, true ]
+}
+tracks/3/type = "value"
+tracks/3/path = NodePath("hitArea2/hitBox:shape")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"times": PoolRealArray( 0.0666667, 0.1 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 1,
+"values": [ SubResource( 52 ), SubResource( 52 ) ]
+}
+tracks/4/type = "value"
+tracks/4/path = NodePath("hitArea2/hitBox:position")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/keys = {
+"times": PoolRealArray( 0, 0.0666667, 0.15 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Vector2( 49, 114 ), Vector2( 60, 114 ), Vector2( 49, 114 ) ]
+}
+tracks/5/type = "method"
+tracks/5/path = NodePath(".")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/keys = {
+"times": PoolRealArray( 0.0666667 ),
+"transitions": PoolRealArray( 1 ),
+"values": [ {
+"args": [  ],
+"method": "allowChain"
+} ]
+}
 
-[sub_resource type="Animation" id=44]
+[sub_resource type="Animation" id=79]
 resource_name = "jumpDiag"
 length = 0.466668
 step = 0.0166667
@@ -561,13 +760,30 @@ tracks/1/loop_wrap = true
 tracks/1/imported = false
 tracks/1/enabled = true
 tracks/1/keys = {
-"times": PoolRealArray( 0.0333333, 0.15, 0.2, 0.25, 0.3, 0.35 ),
-"transitions": PoolRealArray( 1, 1, 1, 1, 1, 1 ),
+"times": PoolRealArray( 0, 0.0333333, 0.15, 0.2, 0.25, 0.3, 0.35 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1, 1, 1 ),
 "update": 1,
-"values": [ 9, 11, 12, 13, 14, 10 ]
+"values": [ 0, 9, 11, 12, 13, 14, 10 ]
 }
 
-[sub_resource type="Animation" id=45]
+[sub_resource type="Animation" id=80]
+resource_name = "jumpJab"
+length = 0.166667
+step = 0.0166667
+tracks/0/type = "value"
+tracks/0/path = NodePath("playerSprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0.0333333 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ 38 ]
+}
+
+[sub_resource type="Animation" id=81]
 resource_name = "jumpUp"
 length = 0.516668
 step = 0.0166667
@@ -598,7 +814,7 @@ tracks/1/keys = {
 } ]
 }
 
-[sub_resource type="Animation" id=46]
+[sub_resource type="Animation" id=82]
 resource_name = "short"
 length = 0.2
 step = 0.0166667
@@ -615,7 +831,7 @@ tracks/0/keys = {
 "values": [ 0, 20, 21, 20 ]
 }
 
-[sub_resource type="Animation" id=47]
+[sub_resource type="Animation" id=83]
 resource_name = "strong"
 length = 0.366667
 step = 0.0166667
@@ -632,7 +848,7 @@ tracks/0/keys = {
 "values": [ 17, 18, 19 ]
 }
 
-[sub_resource type="Animation" id=48]
+[sub_resource type="Animation" id=84]
 resource_name = "walk"
 length = 0.266667
 step = 0.0166667
@@ -695,14 +911,15 @@ position = Vector2( 388, 204 )
 
 [node name="player1" type="KinematicBody2D" parent="TheGame"]
 position = Vector2( 390, 204 )
+z_index = 1
 script = ExtResource( 3 )
 
 [node name="playerSprite" type="Sprite" parent="TheGame/player1"]
 material = SubResource( 6 )
 position = Vector2( -20, 79 )
 texture = ExtResource( 4 )
-hframes = 39
-frame = 38
+hframes = 52
+frame = 39
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="TheGame/player1"]
 position = Vector2( -22, 88 )
@@ -717,6 +934,7 @@ anims/dashBack = SubResource( 35 )
 anims/falling = SubResource( 26 )
 anims/forward = SubResource( 30 )
 anims/hadouken = SubResource( 11 )
+anims/hurt = SubResource( 68 )
 anims/idle = SubResource( 9 )
 anims/jab = SubResource( 10 )
 anims/jumpDiag = SubResource( 33 )
@@ -735,17 +953,46 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="sparkSpawn" type="Node2D" parent="TheGame/player1"]
+position = Vector2( 3, 91 )
+
+[node name="hitSparks" type="Sprite" parent="TheGame/player1/sparkSpawn"]
+position = Vector2( -1, 0 )
+z_index = 4
+texture = ExtResource( 2 )
+hframes = 5
+
+[node name="sparkAnim" type="AnimationPlayer" parent="TheGame/player1/sparkSpawn/hitSparks"]
+anims/spark = SubResource( 85 )
+
+[node name="hitArea1" type="Area2D" parent="TheGame/player1"]
+modulate = Color( 0.537255, 0.305882, 0.427451, 1 )
+position = Vector2( 3, 90 )
+
+[node name="hitBox" type="CollisionShape2D" parent="TheGame/player1/hitArea1"]
+modulate = Color( 1, 0, 0, 1 )
+self_modulate = Color( 1, 0, 0, 1 )
+show_behind_parent = true
+shape = SubResource( 52 )
+disabled = true
+
+[node name="hurtArea1" type="Area2D" parent="TheGame/player1"]
+modulate = Color( 0.537255, 0.305882, 0.427451, 1 )
+
+[node name="hurtBox" type="CollisionShape2D" parent="TheGame/player1/hurtArea1"]
+modulate = Color( 0, 0.0862745, 1, 1 )
+position = Vector2( -23, 84 )
+shape = SubResource( 51 )
+
 [node name="player2" type="KinematicBody2D" parent="TheGame"]
-position = Vector2( 471, 204 )
-z_index = -1
+position = Vector2( 464, 204 )
 script = ExtResource( 6 )
 
 [node name="playerSprite" type="Sprite" parent="TheGame/player2"]
 material = SubResource( 6 )
 position = Vector2( -20, 79 )
-texture = ExtResource( 2 )
-hframes = 39
-frame = 4
+texture = ExtResource( 4 )
+hframes = 52
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="TheGame/player2"]
 position = Vector2( -22, 88 )
@@ -753,19 +1000,22 @@ shape = SubResource( 27 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="TheGame/player2"]
 autoplay = "idle"
-anims/crouch = SubResource( 36 )
-anims/dash = SubResource( 37 )
-anims/dashBack = SubResource( 38 )
-anims/falling = SubResource( 39 )
-anims/forward = SubResource( 40 )
-anims/hadouken = SubResource( 41 )
-anims/idle = SubResource( 42 )
-anims/jab = SubResource( 43 )
-anims/jumpDiag = SubResource( 44 )
-anims/jumpUp = SubResource( 45 )
-anims/short = SubResource( 46 )
-anims/strong = SubResource( 47 )
-anims/walk = SubResource( 48 )
+anims/crouch = SubResource( 69 )
+anims/crouchJab = SubResource( 70 )
+anims/dash = SubResource( 71 )
+anims/dashBack = SubResource( 72 )
+anims/falling = SubResource( 73 )
+anims/forward = SubResource( 74 )
+anims/hadouken = SubResource( 75 )
+anims/hurt = SubResource( 76 )
+anims/idle = SubResource( 77 )
+anims/jab = SubResource( 78 )
+anims/jumpDiag = SubResource( 79 )
+anims/jumpJab = SubResource( 80 )
+anims/jumpUp = SubResource( 81 )
+anims/short = SubResource( 82 )
+anims/strong = SubResource( 83 )
+anims/walk = SubResource( 84 )
 
 [node name="DebugLabel" type="Label" parent="TheGame/player2"]
 margin_left = -38.0
@@ -775,6 +1025,26 @@ margin_bottom = 65.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="hitArea2" type="Area2D" parent="TheGame/player2"]
+modulate = Color( 0.537255, 0.305882, 0.427451, 1 )
+position = Vector2( -52, -24 )
+
+[node name="hitBox" type="CollisionShape2D" parent="TheGame/player2/hitArea2"]
+modulate = Color( 1, 0, 0, 1 )
+self_modulate = Color( 1, 0, 0, 1 )
+show_behind_parent = true
+position = Vector2( 49, 114 )
+shape = SubResource( 52 )
+disabled = true
+
+[node name="hurtArea2" type="Area2D" parent="TheGame/player2"]
+modulate = Color( 0.537255, 0.305882, 0.427451, 1 )
+
+[node name="hurtBox" type="CollisionShape2D" parent="TheGame/player2/hurtArea2"]
+modulate = Color( 0, 0.0862745, 1, 1 )
+position = Vector2( -23, 84 )
+shape = SubResource( 51 )
 
 [node name="CameraController" type="KinematicBody2D" parent="TheGame"]
 position = Vector2( 404, 261 )

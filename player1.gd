@@ -21,9 +21,10 @@ func _ready():
 		'hk': 'hardK',
 	}
 	enemy = 'player2'
-
-
-
+	hitBox = get_node("hitArea1/hitBox");
+	boxAreaHit = get_node("hitArea1")
+	boxAreaHurt = get_node("hurtArea1")
+	enemyInstance = get_node('../player2');
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 #func _process(delta):
 #	pass
